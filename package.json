@@ -1,0 +1,45 @@
+{
+  "name": "pi-thinking-prune",
+  "version": "0.1.0",
+  "description": "Pi extension package for summarizing and pruning assistant thinking blocks from future context while preserving recoverable originals.",
+  "type": "module",
+  "scripts": {
+    "build": "npm run check",
+    "check": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "context-prune",
+    "thinking-prune"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ch0udry/pi-thinking-prune.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ch0udry/pi-thinking-prune/issues"
+  },
+  "homepage": "https://github.com/ch0udry/pi-thinking-prune#readme",
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.41"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-ai": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.0"
+  }
+}
