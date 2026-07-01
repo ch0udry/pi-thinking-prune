@@ -113,12 +113,12 @@ Default:
   "summarizerThinking": "default",
   "pruneOn": "agent-message",
   "batchingMode": "turn",
-  "minRawCharsToPrune": 0,
+  "minRawCharsToPrune": 1000,
   "skipOversizedSummary": true
 }
 ```
 
-`skipOversizedSummary` defaults to `true`, matching `pi-context-prune`: if a generated summary is larger than the raw thinking it would replace, the extension skips indexing/pruning that batch and advances a local `thinking-prune-frontier` so it is not summarized repeatedly.
+`minRawCharsToPrune` defaults to `1000`, so small thinking blocks are ignored by default. `skipOversizedSummary` defaults to `true`, matching `pi-context-prune`: if a generated summary is larger than the raw thinking it would replace, the extension skips indexing/pruning that batch and advances a local `thinking-prune-frontier` so it is not summarized repeatedly.
 
 Lifecycle behavior also mirrors `pi-context-prune`: pending batches are restored on summarizer/persistence failure, final-message auto flush uses session delivery, manual/runtime flush can inject hidden steer messages, and stale extension contexts return a `stale-context` result instead of corrupting state.
 `enabled` defaults to `false` for safety. Run:

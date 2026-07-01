@@ -5,6 +5,8 @@ import { pruneMessages } from "../src/pruner.js";
 import { ThinkingIndexer } from "../src/indexer.js";
 import { DEFAULT_CONFIG } from "../src/types.js";
 
+const TEST_CONFIG = { ...DEFAULT_CONFIG, minRawCharsToPrune: 0 };
+
 test("captures assistant thinking blocks from session branch", () => {
   const branch = [
     { type: "message", id: "u1", message: { role: "user", content: "hi" } },
@@ -25,7 +27,7 @@ test("captures assistant thinking blocks from session branch", () => {
     },
   ];
   const indexer = { isSummarizedPruneKey: () => false };
-  const batches = captureUnindexedThinkingBatchesFromSession(branch, indexer, DEFAULT_CONFIG);
+  const batches = captureUnindexedThinkingBatchesFromSession(branch, indexer, TEST_CONFIG);
   assert.equal(batches.length, 1);
   assert.equal(batches[0].thinkingBlocks.length, 1);
   assert.equal(batches[0].thinkingBlocks[0].thinking, "private reasoning");
@@ -46,7 +48,7 @@ test("prunes indexed thinking blocks but keeps visible text and tool calls", () 
   };
   const branch = [{ type: "message", id: "a1", timestamp: "2026-01-01T00:00:00.000Z", message }];
   const indexer = new ThinkingIndexer();
-  const batches = captureUnindexedThinkingBatchesFromSession(branch, indexer, DEFAULT_CONFIG);
+  const batches = captureUnindexedThinkingBatchesFromSession(branch, indexer, TEST_CONFIG);
   indexer.persistBatch(batches[0], () => undefined);
 
   const pruned = pruneMessages([message], indexer);
@@ -65,7 +67,7 @@ test("drops assistant message when only indexed thinking remains", () => {
   };
   const branch = [{ type: "message", id: "a2", timestamp: "2026-01-01T00:00:01.000Z", message }];
   const indexer = new ThinkingIndexer();
-  const batches = captureUnindexedThinkingBatchesFromSession(branch, indexer, DEFAULT_CONFIG);
+  const batches = captureUnindexedThinkingBatchesFromSession(branch, indexer, TEST_CONFIG);
   indexer.persistBatch(batches[0], () => undefined);
 
   const pruned = pruneMessages([message], indexer);

@@ -48,7 +48,7 @@ export const DEFAULT_CONFIG: ThinkingPruneConfig = {
   summarizerThinking: "default",
   pruneOn: "agent-message",
   batchingMode: "turn",
-  minRawCharsToPrune: 0,
+  minRawCharsToPrune: 1000,
   skipOversizedSummary: true,
 };
 
