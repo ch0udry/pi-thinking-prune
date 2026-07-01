@@ -36,6 +36,7 @@ const SUBCOMMANDS = [
   { value: "status", label: "status    — show status, model, thinking, trigger, batching, and stats" },
   { value: "model", label: "model     — show or set the summarizer model" },
   { value: "thinking", label: "thinking  — show or set the summarizer thinking level" },
+  { value: "min-raw-chars", label: "min-raw-chars — show or set minimum raw thinking chars" },
   { value: "prune-on", label: "prune-on  — show or set the trigger mode" },
   { value: "batching", label: "batching  — show or set the batching mode" },
   { value: "stats", label: "stats     — show cumulative summarizer token/cost stats" },
@@ -115,6 +116,8 @@ Usage:
   /thinking-pruner model <id>                       Set summarizer model, e.g. anthropic/claude-haiku-3-5
   /thinking-pruner model <id>:<thinking>            Set model and thinking together, e.g. openai/gpt-5-mini:low
   /thinking-pruner thinking <level>                 Set summarizer thinking: default, off, minimal, low, medium, high, xhigh
+  /thinking-pruner min-raw-chars                    Show minimum thinking block size for summarization
+  /thinking-pruner min-raw-chars 1000               Ignore thinking blocks smaller than 1000 chars
   /thinking-pruner prune-on                         Show or interactively pick trigger
   /thinking-pruner prune-on every-turn              Summarize after every assistant message
   /thinking-pruner prune-on on-demand               Only summarize when /thinking-pruner now runs
@@ -209,6 +212,56 @@ function buildTreeText(indexer: ThinkingIndexer): string {
     .join("\n\n");
 }
 
+function numericInputComponent(
+  title: string,
+  currentValue: string,
+  done: (newValue?: string) => void,
+  validate: (value: string) => string | undefined,
+): { handleInput(data: string): void; render(width: number): string[]; invalidate(): void } {
+  let value = currentValue;
+  let error: string | undefined;
+  const clamp = (text: string) => text.replace(/[^0-9]/g, "");
+
+  return {
+    handleInput(data: string) {
+      if (data === "\u001b") {
+        done(undefined);
+        return;
+      }
+      if (data === "\r" || data === "\n") {
+        const maybeError = validate(value);
+        if (maybeError) {
+          error = maybeError;
+          return;
+        }
+        done(value);
+        return;
+      }
+      if (data === "\u007f" || data === "\b") {
+        value = value.slice(0, -1);
+        error = undefined;
+        return;
+      }
+      const next = clamp(data);
+      if (next.length > 0) {
+        value += next;
+        error = undefined;
+      }
+    },
+    render(_width: number) {
+      return [
+        title,
+        "",
+        `Value: ${value || "0"}`,
+        "",
+        "Type digits, Enter to save, Esc to cancel, Backspace to edit.",
+        ...(error ? ["", `Error: ${error}`] : []),
+      ];
+    },
+    invalidate() {},
+  };
+}
+
 export function registerCommands(
   pi: ExtensionAPI,
   currentConfig: { value: ThinkingPruneConfig },
@@ -268,7 +321,20 @@ export function registerCommands(
             },
             { id: "summarizerThinking", label: "Summarizer thinking", values: SUMMARIZER_THINKING_LEVELS.map((level) => level.value), currentValue: config.summarizerThinking, description: summarizerThinkingDescription(config.summarizerThinking) },
             { id: "batchingMode", label: "Batching mode", values: BATCHING_MODES.map((m) => m.value), currentValue: config.batchingMode, description: "Choose summary granularity" },
-            { id: "minRawCharsToPrune", label: "Minimum raw chars", values: [String(config.minRawCharsToPrune)], currentValue: String(config.minRawCharsToPrune), description: "Minimum thinking block length to summarize/prune" },
+            {
+              id: "minRawCharsToPrune",
+              label: "Minimum raw chars",
+              values: [String(config.minRawCharsToPrune)],
+              currentValue: String(config.minRawCharsToPrune),
+              description: "Minimum thinking block length to summarize/prune — press Enter to edit",
+              submenu: (currentValue: string, done: (newValue?: string) => void) =>
+                numericInputComponent(
+                  "thinking-pruner — minimum raw thinking chars",
+                  currentValue,
+                  done,
+                  (value) => Number.isFinite(Number(value)) && Number(value) >= 0 ? undefined : "Enter a non-negative integer.",
+                ),
+            },
             { id: "skipOversizedSummary", label: "Skip oversized summaries", values: ["true", "false"], currentValue: String(config.skipOversizedSummary), description: "Match context-prune behavior: skip if summary is bigger than raw thinking" },
           ];
 
@@ -367,6 +433,23 @@ export function registerCommands(
           ctx.ui.notify(`Summarizer thinking set to: ${currentConfig.value.summarizerThinking}`);
           break;
         }
+        case "min-raw-chars": {
+          const rawArg = subArgs[0];
+          if (!rawArg) {
+            ctx.ui.notify(`Current minimum raw chars: ${currentConfig.value.minRawCharsToPrune}`);
+            return;
+          }
+          const parsed = Number(rawArg);
+          if (!Number.isInteger(parsed) || parsed < 0) {
+            ctx.ui.notify("Invalid min-raw-chars value. Use a non-negative integer, e.g. /thinking-pruner min-raw-chars 1000", "warning");
+            return;
+          }
+          currentConfig.value = { ...currentConfig.value, minRawCharsToPrune: parsed };
+          await persist();
+          ctx.ui.notify(`Minimum raw thinking chars set to: ${parsed}`);
+          break;
+        }
+
 
         case "prune-on": {
           const modeArg = subArgs[0];
