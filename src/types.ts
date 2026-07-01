@@ -1,6 +1,7 @@
 export const CUSTOM_TYPE_SUMMARY = "thinking-prune-summary";
 export const CUSTOM_TYPE_INDEX = "thinking-prune-index";
 export const CUSTOM_TYPE_STATS = "thinking-prune-stats";
+export const CUSTOM_TYPE_FRONTIER = "thinking-prune-frontier";
 export const STATUS_WIDGET_ID = "thinking-prune";
 
 export type PruneOn = "every-turn" | "on-demand" | "agent-message";
@@ -47,7 +48,7 @@ export const DEFAULT_CONFIG: ThinkingPruneConfig = {
   pruneOn: "agent-message",
   batchingMode: "turn",
   minRawCharsToPrune: 0,
-  skipOversizedSummary: false,
+  skipOversizedSummary: true,
 };
 
 export interface CapturedThinkingBlock {
@@ -93,6 +94,21 @@ export interface SummaryMessageDetails {
   turnIndex: number;
   timestamp: number;
   rawCharCount: number;
+}
+
+export type ThinkingPruneFrontierOutcome = "summarized" | "skipped-oversized";
+
+export interface ThinkingPruneFrontier {
+  lastAttemptedThinkingId: string;
+  lastAttemptedMessageEntryId: string;
+  lastAttemptedBlockIndex: number;
+  lastAttemptedTurnIndex: number;
+  lastAttemptedTimestamp: number;
+  attemptedBatchCount: number;
+  attemptedThinkingBlockCount: number;
+  rawCharCount: number;
+  summaryCharCount: number;
+  outcome: ThinkingPruneFrontierOutcome;
 }
 
 export interface SummarizerStats {

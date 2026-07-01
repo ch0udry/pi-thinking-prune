@@ -111,11 +111,11 @@ Default:
   "pruneOn": "agent-message",
   "batchingMode": "turn",
   "minRawCharsToPrune": 0,
-  "skipOversizedSummary": false
+  "skipOversizedSummary": true
 }
 ```
 
-`skipOversizedSummary` defaults to `false`, so long thinking is still summarized/indexed/pruned even when the summary is not smaller than the raw block.
+`skipOversizedSummary` defaults to `true`, matching `pi-context-prune`: if a generated summary is larger than the raw thinking it would replace, the extension skips indexing/pruning that batch and advances a local `thinking-prune-frontier` so it is not summarized repeatedly.
 `enabled` defaults to `false` for safety. Run:
 
 ```text
