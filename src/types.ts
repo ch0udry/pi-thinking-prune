@@ -3,6 +3,7 @@ export const CUSTOM_TYPE_INDEX = "thinking-prune-index";
 export const CUSTOM_TYPE_STATS = "thinking-prune-stats";
 export const CUSTOM_TYPE_FRONTIER = "thinking-prune-frontier";
 export const STATUS_WIDGET_ID = "thinking-prune";
+export const PROGRESS_WIDGET_ID = "thinking-prune-progress";
 
 export type PruneOn = "every-turn" | "on-demand" | "agent-message";
 export type BatchingMode = "turn" | "agent-message";
@@ -44,7 +45,7 @@ export const DEFAULT_CONFIG: ThinkingPruneConfig = {
   enabled: false,
   showStatusLine: true,
   summarizerModel: "default",
-  summarizerThinking: "off",
+  summarizerThinking: "default",
   pruneOn: "agent-message",
   batchingMode: "turn",
   minRawCharsToPrune: 0,
@@ -136,4 +137,7 @@ export interface SummarizeBatchesOptions {
 export interface FlushOptions {
   signal?: AbortSignal;
   previewedBatches?: CapturedThinkingBatch[];
+  delivery?: "runtime" | "session";
+  onProgress?: (index: number, total: number, batch: CapturedThinkingBatch, stage: "start" | "done" | "skipped") => void;
+  onBatchTextProgress?: (index: number, total: number, batch: CapturedThinkingBatch, receivedChars: number) => void;
 }

@@ -21,6 +21,10 @@ export class StatsAccumulator {
     pi.appendEntry(CUSTOM_TYPE_STATS, this.getStats());
   }
 
+  reset(): void {
+    this.stats = { totalInputTokens: 0, totalOutputTokens: 0, totalCost: 0, callCount: 0 };
+  }
+
   reconstructFromSession(ctx: ExtensionContext): void {
     this.stats = { totalInputTokens: 0, totalOutputTokens: 0, totalCost: 0, callCount: 0 };
     for (const entry of ctx.sessionManager.getBranch()) {
@@ -35,4 +39,25 @@ export class StatsAccumulator {
       };
     }
   }
+}
+
+export function formatCompactCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
+
+export function formatTokens(n: number): string {
+  return formatCompactCount(n);
+}
+
+export function formatCharProgress(receivedChars: number, rawChars?: number): string {
+  const receivedLabel = `${formatCompactCount(receivedChars)} summary char${receivedChars === 1 ? "" : "s"}`;
+  if (rawChars == null) return receivedLabel;
+  return `${receivedLabel} / ${formatCompactCount(rawChars)} raw char${rawChars === 1 ? "" : "s"}`;
+}
+
+export function formatCost(n: number): string {
+  if (n < 0.001 && n > 0) return "<$0.001";
+  return `$${n.toFixed(3)}`;
 }

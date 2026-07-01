@@ -29,6 +29,7 @@
     ]
   },
   "dependencies": {
+    "@earendil-works/pi-tui": "*",
     "@sinclair/typebox": "^0.34.41"
   },
   "peerDependencies": {

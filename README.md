@@ -66,14 +66,17 @@ pi -e /path/to/pi-thinking-prune
 ## Commands
 
 ```text
+/thinking-pruner settings
 /thinking-pruner status
 /thinking-pruner on
 /thinking-pruner off
 /thinking-pruner now
 /thinking-pruner model [default|provider/model-id]
+/thinking-pruner model provider/model-id:low
 /thinking-pruner thinking [default|off|minimal|low|medium|high|xhigh]
 /thinking-pruner prune-on [every-turn|on-demand|agent-message]
 /thinking-pruner batching [turn|agent-message]
+/thinking-pruner tree
 /thinking-pruner stats
 /thinking-pruner help
 ```
@@ -107,7 +110,7 @@ Default:
   "enabled": false,
   "showStatusLine": true,
   "summarizerModel": "default",
-  "summarizerThinking": "off",
+  "summarizerThinking": "default",
   "pruneOn": "agent-message",
   "batchingMode": "turn",
   "minRawCharsToPrune": 0,
@@ -116,6 +119,8 @@ Default:
 ```
 
 `skipOversizedSummary` defaults to `true`, matching `pi-context-prune`: if a generated summary is larger than the raw thinking it would replace, the extension skips indexing/pruning that batch and advances a local `thinking-prune-frontier` so it is not summarized repeatedly.
+
+Lifecycle behavior also mirrors `pi-context-prune`: pending batches are restored on summarizer/persistence failure, final-message auto flush uses session delivery, manual/runtime flush can inject hidden steer messages, and stale extension contexts return a `stale-context` result instead of corrupting state.
 `enabled` defaults to `false` for safety. Run:
 
 ```text
