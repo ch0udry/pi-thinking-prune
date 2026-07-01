@@ -111,10 +111,11 @@ Default:
   "pruneOn": "agent-message",
   "batchingMode": "turn",
   "minRawCharsToPrune": 0,
-  "skipOversizedSummary": true
+  "skipOversizedSummary": false
 }
 ```
 
+`skipOversizedSummary` defaults to `false`, so long thinking is still summarized/indexed/pruned even when the summary is not smaller than the raw block.
 `enabled` defaults to `false` for safety. Run:
 
 ```text

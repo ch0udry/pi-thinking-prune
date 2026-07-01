@@ -47,7 +47,7 @@ export const DEFAULT_CONFIG: ThinkingPruneConfig = {
   pruneOn: "agent-message",
   batchingMode: "turn",
   minRawCharsToPrune: 0,
-  skipOversizedSummary: true,
+  skipOversizedSummary: false,
 };
 
 export interface CapturedThinkingBlock {
